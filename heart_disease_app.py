@@ -1,75 +1,91 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import pickle
 
-# Load the model
-with open("heart_model.pkl", "rb") as f:
-    model = pickle.load(f)
+# Load trained model
+with open('heart_model.pkl', 'rb') as file:
+    model = pickle.load(file)
 
-# Set page config
-st.set_page_config(page_title="💓 Heart Disease Predictor", layout="centered")
+# Page configuration
+st.set_page_config(page_title="Heart Disease Predictor 💓", page_icon="💓", layout="centered")
 
-# Header
-st.markdown("<h1 style='text-align: center; color: crimson;'>💓 Heart Disease Risk Assessment</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; font-size: 18px;'>A real-world machine learning app powered by a Random Forest classifier.</p>", unsafe_allow_html=True)
-st.markdown("---")
+# App title
+st.markdown("""
+    <h1 style="color: #DC143C; text-align: center;">💓 Heart Disease Risk Assessment</h1>
+    <h4 style="text-align: center; color: gray;">
+        A real-world machine learning app powered by a Random Forest classifier.
+    </h4>
+    <br>
+""", unsafe_allow_html=True)
 
-# Collect user input
 st.markdown("### 👤 Patient Information")
 
-col1, col2 = st.columns(2)
+# Form inputs
+with st.form(key='heart_form'):
+    col1, col2 = st.columns(2)
 
-with col1:
-    age = st.number_input("Age", 1, 120, 45)
-    sex = st.selectbox("Sex", ["Male", "Female"])
-    cp = st.selectbox("Chest Pain Type", ["Typical Angina", "Atypical Angina", "Non-anginal Pain", "Asymptomatic"])
-    trestbps = st.number_input("Resting Blood Pressure (mm Hg)", 80, 200, 120)
-    chol = st.number_input("Serum Cholesterol (mg/dl)", 100, 600, 200)
+    with col1:
+        age = st.slider("Age", 20, 100, 40)
+        bp = st.number_input("Blood Pressure (mmHg)", min_value=50, max_value=200, value=120)
+        chol = st.number_input("Cholesterol (mg/dL)", min_value=100, max_value=400, value=200)
+        hr = st.number_input("Heart Rate (bpm)", min_value=40, max_value=200, value=80)
+        blood_sugar = st.selectbox("Blood Sugar Level", ['Normal', 'High'])
 
-with col2:
-    fbs = st.selectbox("Fasting Blood Sugar > 120 mg/dl", ["Yes", "No"])
-    restecg = st.selectbox("Resting ECG Results", ["Normal", "ST-T Abnormality", "Left Ventricular Hypertrophy"])
-    thalach = st.number_input("Maximum Heart Rate Achieved", 60, 220, 150)
-    exang = st.selectbox("Exercise Induced Angina", ["Yes", "No"])
-    oldpeak = st.slider("ST Depression", 0.0, 6.0, 1.0, 0.1)
-    slope = st.selectbox("Slope of Peak Exercise ST Segment", ["Upsloping", "Flat", "Downsloping"])
+    with col2:
+        gender = st.selectbox("Gender", ['Male', 'Female'])
+        cp_type = st.selectbox("Chest Pain Type", ['Typical Angina', 'Atypical Angina', 'Non-anginal Pain', 'Asymptomatic'])
+        exercise_hours = st.slider("Weekly Exercise Hours", 0, 20, 3)
+        stress = st.slider("Stress Level (1-10)", 1, 10, 5)
+        smoking = st.selectbox("Smoking Status", ['Never', 'Former', 'Current'])
 
-# Preprocess user input
-sex = 1 if sex == "Male" else 0
-cp_map = {"Typical Angina": 0, "Atypical Angina": 1, "Non-anginal Pain": 2, "Asymptomatic": 3}
-restecg_map = {"Normal": 0, "ST-T Abnormality": 1, "Left Ventricular Hypertrophy": 2}
-slope_map = {"Upsloping": 0, "Flat": 1, "Downsloping": 2}
-fbs = 1 if fbs == "Yes" else 0
-exang = 1 if exang == "Yes" else 0
+    st.markdown("### 🩺 Medical History")
+    col3, col4, col5 = st.columns(3)
+    with col3:
+        alcohol = st.selectbox("Alcohol Intake", ['None', 'Moderate', 'High'])
+    with col4:
+        family_history = st.selectbox("Family History of Heart Disease", ['No', 'Yes'])
+    with col5:
+        diabetes = st.selectbox("Diabetes", ['No', 'Yes'])
 
-input_data = pd.DataFrame({
-    "age": [age],
-    "sex": [sex],
-    "cp": [cp_map[cp]],
-    "trestbps": [trestbps],
-    "chol": [chol],
-    "fbs": [fbs],
-    "restecg": [restecg_map[restecg]],
-    "thalach": [thalach],
-    "exang": [exang],
-    "oldpeak": [oldpeak],
-    "slope": [slope_map[slope]]
-})
+    col6, col7 = st.columns(2)
+    with col6:
+        obesity = st.selectbox("Obesity", ['No', 'Yes'])
+    with col7:
+        angina = st.selectbox("Exercise Induced Angina", ['No', 'Yes'])
 
-# Prediction button
-st.markdown("---")
-if st.button("🩺 Predict Heart Disease Risk"):
-    prediction = model.predict(input_data)[0]
-    prob = model.predict_proba(input_data)[0][1] * 100
+    submitted = st.form_submit_button("🔍 Predict")
 
-    if prediction == 1:
-        st.error(f"⚠️ High Risk of Heart Disease ({prob:.2f}%)")
-        st.markdown("💡 *Please consult a cardiologist as soon as possible.*")
-    else:
-        st.success(f"✅ Low Risk of Heart Disease ({prob:.2f}%)")
-        st.markdown("🎉 *You're likely heart-healthy. Keep up with regular checkups!*")
+# If submitted
+if submitted:
+    # Prepare input data
+    data = {
+        'Age': age,
+        'Cholesterol': chol,
+        'Blood Pressure': bp,
+        'Heart Rate': hr,
+        'Exercise Hours': exercise_hours,
+        'Stress Level': stress,
+        'Blood Sugar': 1 if blood_sugar == 'High' else 0,
 
-# Footer
-st.markdown("---")
-st.markdown("<p style='text-align: center; font-size: 13px;'>Made with ❤️ for health awareness</p>", unsafe_allow_html=True)
+        'Gender_Male': 1 if gender == 'Male' else 0,
+        'Smoking_Former': 1 if smoking == 'Former' else 0,
+        'Smoking_Never': 1 if smoking == 'Never' else 0,
+        'Alcohol Intake_Moderate': 1 if alcohol == 'Moderate' else 0,
+        'Family History_Yes': 1 if family_history == 'Yes' else 0,
+        'Diabetes_Yes': 1 if diabetes == 'Yes' else 0,
+        'Obesity_Yes': 1 if obesity == 'Yes' else 0,
+        'Exercise Induced Angina_Yes': 1 if angina == 'Yes' else 0,
+
+        'Chest Pain Type_Atypical Angina': 1 if cp_type == 'Atypical Angina' else 0,
+        'Chest Pain Type_Non-anginal Pain': 1 if cp_type == 'Non-anginal Pain' else 0,
+        'Chest Pain Type_Typical Angina': 1 if cp_type == 'Typical Angina' else 0,
+    }
+
+    input_df = pd.DataFrame([data])
+
+    # Prediction
+    prediction = model.predict(input_df)[0]
+    risk = "High Risk 💔" if prediction == 1 else "Low Risk 💖"
+
+    st.markdown("---")
+    st.success(f"### 🧠 Prediction: **{risk}**")
