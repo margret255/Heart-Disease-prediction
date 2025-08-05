@@ -1,10 +1,14 @@
 import streamlit as st
 import pandas as pd
-import pickle
+
 
 # Load trained model
-with open('heart_model.pkl', 'rb') as file:
-    model = pickle.load(file)
+
+import joblib
+
+model = joblib.load('model.pkl')
+
+
 
 # Page configuration
 st.set_page_config(page_title="Heart Disease Predictor 💓", page_icon="💓", layout="centered")
