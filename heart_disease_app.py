@@ -8,7 +8,7 @@ import joblib
 
 model = joblib.load('model.pkl')
  
-
+ 
 
 # Page configuration
 st.set_page_config(page_title="Heart Disease Predictor 💓", page_icon="💓", layout="centered")
