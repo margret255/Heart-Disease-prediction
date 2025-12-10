@@ -18,7 +18,7 @@ st.markdown("""
     <h1 style="color: #DC143C; text-align: center;">💓 Heart Disease Risk Assessment</h1>
     <h4 style="text-align: center; color: gray;">
         A real-world machine learning app powered by a Random Forest classifier.
-    </h4>
+    </h4> 
     <br>
 """, unsafe_allow_html=True)
 
