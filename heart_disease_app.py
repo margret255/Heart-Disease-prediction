@@ -19,7 +19,7 @@ st.markdown("""
     <h4 style="text-align: center; color: gray;">
         A real-world machine learning app powered by a Random Forest classifier.
     </h4> 
-    <br>
+    <br> 
 """, unsafe_allow_html=True)
 
 st.markdown("### 👤 Patient Information")
